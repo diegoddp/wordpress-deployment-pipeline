@@ -5,9 +5,9 @@ This repository contains the YAML pipeline configuration for deploying WordPress
 ## Pipeline Overview
 The pipeline is divided into three main stages:
 
-1.Build Package: This stage builds the WordPress artifact and performs necessary checks.
-2.Deploy to UAT: This stage deploys the built artifact to the UAT environment.
-3.Deploy to Production: This stage deploys the built artifact to the production environment.
+1. Build Package: This stage builds the WordPress artifact and performs necessary checks.
+2. Deploy to UAT: This stage deploys the built artifact to the UAT environment.
+3. Deploy to Production: This stage deploys the built artifact to the production environment.
 
 ## Pipeline Configuration
 ### Trigger

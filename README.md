@@ -2,7 +2,7 @@
 
 This repository contains the YAML pipeline configuration for deploying WordPress sites using Azure DevOps. The deployment process has been migrated from classic pipelines to YAML for better version control and flexibility.
 
-##Pipeline Overview
+## Pipeline Overview
 The pipeline is divided into three main stages:
 
 1.Build Package: This stage builds the WordPress artifact and performs necessary checks.

@@ -184,3 +184,79 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'drop'
 ````
+
+**Deploy to UAT**
+
+This stage deploys the built artifact to the UAT environment and resets the database.
+````
+- stage: DeployToUAT
+  displayName: 'Deploy to UAT'
+  dependsOn: Build
+  jobs:
+  - deployment: UATDeploy
+    environment: 'uat' # Azure DevOps environment name
+    displayName: 'Deploy to UAT'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: AzureWebApp@1
+            displayName: 'Deploy to UAT'
+            inputs:
+              azureSubscription: '$(azureSubsc)' # Azure subscription for staging
+              appType: 'webAppLinux'
+              appName: '$(appservice_name)'
+              package: '$(Pipeline.Workspace)/drop/wordpress.zip'
+              runtimeStack: 'PHP|8.2'
+            enabled: true
+          
+          - script: |
+              mysql --host=$(sqlhost).mysql.database.azure.com --user=$(administratorLogin) --password=$(administratorLoginPassword) --ssl-mode=REQUIRED --silent -e "DROP DATABASE IF EXISTS $(databases_mysql_name_uat); CREATE DATABASE $(databases_mysql_name_uat);"
+            displayName: 'Reset Database'
+            enabled: true
+
+          - script: |
+              mysql --host=$(sqlhost).mysql.database.azure.com --user=$(administratorLogin) --password=$(administratorLoginPassword) --ssl-mode=REQUIRED $(databases_mysql_name_uat) < "$(Pipeline.Workspace)/drop/db/blankdb.sql"
+            displayName: 'Deploy Database'
+````
+**Deploy to Production**
+
+This stage deploys the built artifact to the production environment and resets the database.
+
+````
+- stage: DeployToProduction
+  displayName: 'Deploy to Production'
+  dependsOn: DeployToUAT
+  jobs:
+  - deployment: ProductionDeploy
+    environment: prd
+    displayName: 'Production Deployment'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Azure App Service Deploy: $(appservice_name)'
+            inputs:
+              azureSubscription: '$(azureSubsc)'
+              appType: webAppLinux
+              WebAppName: '$(appservice_name)'
+              deployToSlotOrASE: true
+              ResourceGroupName: '$(ResourceGroupName)'
+              SlotName: prd
+              package: '$(Pipeline.Workspace)/drop/wordpress.zip'
+
+          - script: |
+              mysql --host=$(sqlhost).mysql.database.azure.com --user=$(administratorLogin) --password=$(administratorLoginPassword) --ssl-mode=REQUIRED --silent -e "DROP DATABASE IF EXISTS $(databases_mysql_name_prd); CREATE DATABASE $(databases_mysql_name_prd);"
+            displayName: 'Reset Database'
+
+          - script: |
+              mysql --host=$(sqlhost).mysql.database.azure.com --user=$(administratorLogin) --password=$(administratorLoginPassword) --ssl-mode=REQUIRED $(databases_mysql_name_prd) < "$(Pipeline.Workspace)/drop/db/blankdb.sql"
+            displayName: 'Deploy Database'
+````
+
+**Security Considerations**
+
+Ensure that sensitive information such as client IDs, client secrets, passwords, and database names are managed securely through environment variables or other secure methods.

@@ -14,6 +14,8 @@ The pipeline is divided into three main stages:
 The pipeline is triggered on changes to the master branch.
 
 ``
+
 trigger:
 - master
-  ``
+
+``

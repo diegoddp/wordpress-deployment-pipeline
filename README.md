@@ -40,7 +40,7 @@ variables:
 **Stages**
 
 **Build Package**
-This stage builds the WordPress artifact and performs checks for unauthorized email addresses and disallowed plugins.
+This stage builds the WordPress artifact and performs checks for unauthorized email addresses (PII data), disallowed plugins also delete any .sql in the root.
 
 ````
 stages:
@@ -187,7 +187,7 @@ stages:
 
 **Deploy to UAT**
 
-This stage deploys the built artifact to the UAT environment and resets the database.
+This stage deploys the built artifact to the UAT environment resets the old database deploy a new database.
 ````
 - stage: DeployToUAT
   displayName: 'Deploy to UAT'
@@ -222,7 +222,7 @@ This stage deploys the built artifact to the UAT environment and resets the data
 ````
 **Deploy to Production**
 
-This stage deploys the built artifact to the production environment and resets the database.
+This stage deploys the built artifact to the production environment the old database deploy a new database.
 
 ````
 - stage: DeployToProduction
